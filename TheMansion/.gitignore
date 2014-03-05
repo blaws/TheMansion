@@ -1,0 +1,7 @@
+# ignore binary, .o files, unused textures, and temp files
+
+TheMansion
+build/
+src/textures/lunar.lostgarden.com/
+*.o
+*~
