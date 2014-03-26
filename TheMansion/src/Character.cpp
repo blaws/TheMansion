@@ -7,10 +7,11 @@
 
 #include "Include.h"
 
-Character::Character(double x, double y, int w, int h, string texture, int xframes, int yframes, double s)
+Character::Character(double x, double y, int w, int h, string texture, int xframes, int yframes, double s, int dir)
 	: Entity(x, y, w, h, texture, xframes, yframes) {
 	speed = s;
 	movingRight = movingLeft = movingUp = movingDown = false;
+	facingDir = dir;
 }
 
 Character::~Character() {
@@ -18,10 +19,22 @@ Character::~Character() {
 
 void Character::startMoveDir(int dir){
 	switch(dir){
-	case DIRECTION_RIGHT: movingRight=true; break;
-	case DIRECTION_LEFT: movingLeft=true; break;
-	case DIRECTION_UP: movingUp=true; break;
-	case DIRECTION_DOWN: movingDown=true; break;
+	case DIRECTION_RIGHT:
+		movingRight=true;
+		facingDir = DIRECTION_RIGHT;
+		break;
+	case DIRECTION_LEFT:
+		movingLeft=true;
+		if(!movingRight) facingDir = DIRECTION_LEFT;
+		break;
+	case DIRECTION_UP:
+		movingUp=true;
+		if(!movingRight && !movingLeft) facingDir = DIRECTION_UP;
+		break;
+	case DIRECTION_DOWN:
+		movingDown=true;
+		if(!movingRight && !movingLeft && !movingUp) facingDir = DIRECTION_DOWN;
+		break;
 	}
 }
 
@@ -57,5 +70,12 @@ void Character::move(){
 	else if(movingLeft) setFrameX(DIRECTION_LEFT);
 	else if(movingUp) setFrameX(DIRECTION_UP);
 	else if(movingDown) setFrameX(DIRECTION_DOWN);
-	if(movingRight || movingLeft || movingUp || movingDown) nextFrameY();
+	if(movingRight || movingLeft || movingUp || movingDown){
+		nextFrameY();
+		glutPostRedisplay();
+	}
+}
+
+int Character::getFacingDir() const{
+	return facingDir;
 }

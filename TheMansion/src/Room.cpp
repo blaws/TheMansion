@@ -42,18 +42,37 @@ void Room::display() const{
 	}
 }
 
-int Room::isInRoom(double xi, double yi, int wi, int hi){  // wi and hi must be >=2
-	//cout<<"isInRoom?"<<endl;
+int Room::isInRoom(double xi, double yi, double wi, double hi) const{
 	if(wi<=0 || hi<=0) return -1;
-	int val=0;  // val=0 means not in room, 0<val<9 means partially in room, val=9 means fully in room
-	// check six (or four) points of the given box
-	for(double i=xi; i<=xi+wi; i+=wi/2){
-		for(double j=yi; j<=yi+hi; j+=hi/2){
+	int val=0;  // val=0 means not in room, 0<val<4 means partially in room, val=4 means fully in room
+	// check if corners of given box are in room
+	for(double i=xi; i<=xi+wi; i+=wi){
+		for(double j=yi; j<=yi+hi; j+=hi){
 			if(i>=x && i<x+w && j>=y && j<y+h && tiles[abs((int)(j-y))/FLOOR_TILE_SIZE][abs((int)(i-x))/FLOOR_TILE_SIZE].isTraversable()){
+				++val;
+			}
+		}
+	}
+	// check if corners of room are in given box
+	for(double i=x; i<=x+w; i+=w){
+		for(double j=y; j<=y+h; j+=h){
+			if(i>=xi && i<xi+wi && j>=yi && j<yi+hi){
 				++val;
 			}
 		}
 	}
 	//cout<<"  "<<val<<endl;
 	return val;
+}
+
+bool Room::thoroughIsInRoom(double xi, double yi, double wi, double hi) const{
+	if(wi<=0 || hi<=0) return -1;
+	for(double i=xi; i<=xi+wi; ++i){
+		for(double j=yi; j<=yi+hi; ++j){
+			if(i>=x && i<x+w && j>=y && j<y+h && tiles[abs((int)(j-y))/FLOOR_TILE_SIZE][abs((int)(i-x))/FLOOR_TILE_SIZE].isTraversable()){
+				return true;
+			}
+		}
+	}
+	return false;
 }

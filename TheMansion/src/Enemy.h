@@ -8,7 +8,7 @@
 #ifndef ENEMY_H_
 #define ENEMY_H_
 
-#include "include.h"
+#include "Include.h"
 
 class Enemy: public Character {
 public:

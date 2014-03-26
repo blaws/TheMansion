@@ -1,5 +1,5 @@
 /*
- * include.h
+ * Include.h
  *
  *  Created on: Feb 13, 2014
  *      Author: blaws
@@ -10,6 +10,7 @@
 
 #define WINDOW_SIZE 750
 #define ANIMATION_PERIOD 50  // milliseconds
+#define DISPLAY_SWEEP_DELTA M_PI/10
 
 #define PLAYER_WIDTH 16
 #define PLAYER_HEIGHT 32

@@ -15,7 +15,8 @@ public:
 	Room(double=0.0, double=0.0, int=0, int=0, string="floor.bmp", int=0, int=0, int=1, int=1, int[]=NULL);
 	virtual ~Room();
 	void display() const;
-	int isInRoom(double, double, int, int);
+	int isInRoom(double, double, double, double) const;
+	bool thoroughIsInRoom(double, double, double, double) const;
 
 private:
 	vector<vector<Entity> > tiles;

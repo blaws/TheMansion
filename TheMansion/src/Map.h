@@ -9,7 +9,6 @@
 #define MAP_H_
 
 #include "Include.h"
-using namespace std;
 
 class Map {
 public:
@@ -18,10 +17,11 @@ public:
 	void display() const;
 	void displayObjects(int) const;
 	int isInMap(double, double, int, int);
+	bool thoroughIsInMap(double, double, int, int);
 
 private:
-	vector<Room> rooms;
-	vector<Entity> objects;
+	std::vector<Room> rooms;
+	std::vector<Entity> objects;
 
 	bool addNextConnectingRoom(bool, queue<int> &, queue<int> &, queue<int> &);
 };

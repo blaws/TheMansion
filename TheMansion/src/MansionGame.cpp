@@ -61,9 +61,9 @@ void MansionGame::display(){
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	map.display();
-	map.displayObjects(OBJ_BACKGROUND);
+	//map.displayObjects(OBJ_BACKGROUND);
 	protagonist.display();
-	map.displayObjects(OBJ_FOREGROUND);
+	//map.displayObjects(OBJ_FOREGROUND);
 
 	glutSwapBuffers();
 }
@@ -109,12 +109,12 @@ void MansionGame::respondToKeyUp(unsigned char key, int x, int y){
 void MansionGame::animate(){
 	protagonist.move();
 	recenterCamera();
-	glutPostRedisplay();
+	//glutPostRedisplay();
 	glutTimerFunc(ANIMATION_PERIOD, animate_TRAMP, 0);
 }
 
 bool MansionGame::envCollision(double xi, double yi, int wi, int hi){
-	return (map.isInMap(xi, yi, wi, hi) < 9);
+	return (map.isInMap(xi, yi, wi, hi) < 4);
 }
 
 void MansionGame::recenterCamera(){
@@ -130,4 +130,8 @@ double MansionGame::getProtagonistX(){
 
 double MansionGame::getProtagonistY(){
 	return protagonist.getY();
+}
+
+int MansionGame::getProtagonistFacingDir(){
+	return protagonist.getFacingDir();
 }

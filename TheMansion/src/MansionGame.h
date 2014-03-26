@@ -9,7 +9,6 @@
 #define MANSIONGAME_H_
 
 #include "Include.h"
-using namespace std;
 
 class MansionGame {
 public:
@@ -26,6 +25,7 @@ public:
 	void recenterCamera();
 	double getProtagonistX();
 	double getProtagonistY();
+	int getProtagonistFacingDir();
 
 private:
 	MansionGame();  // so that only one instance can be created, through getMansionGame()

@@ -5,7 +5,7 @@
  *      Author: blaws
  */
 
-#include "include.h"
+#include "Include.h"
 
 Entity::Entity(double xi, double yi, int width, int height, string file, int xframes, int yframes, bool trav){
 	x = xi;
