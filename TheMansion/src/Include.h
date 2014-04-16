@@ -10,7 +10,7 @@
 
 #define WINDOW_SIZE 750
 #define ANIMATION_PERIOD 50  // milliseconds
-#define DISPLAY_SWEEP_DELTA M_PI/10
+#define DISPLAY_SWEEP_DELTA M_PI/40
 
 #define PLAYER_WIDTH 16
 #define PLAYER_HEIGHT 32
@@ -29,14 +29,16 @@
 #define G_TRANSPARENT 0
 #define B_TRANSPARENT 255
 
-enum{
+#define INTERACT_DISTANCE 20
+
+enum direction{
 	DIRECTION_RIGHT = 0,
 	DIRECTION_LEFT,
 	DIRECTION_DOWN,
 	DIRECTION_UP
 };
 
-enum{
+enum objectType{
 	OBJ_FOREGROUND,
 	OBJ_BACKGROUND
 };
@@ -58,6 +60,7 @@ typedef struct floortile{
 #include <cerrno>
 #include <cmath>
 
+#include "Functions.h"
 #include "Entity.h"
 #include "Character.h"
 #include "Player.h"

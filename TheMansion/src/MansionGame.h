@@ -18,6 +18,8 @@ public:
 
 	void initAndOpenWindow(int*, char*[]);
 	void display();
+	void displayObjects(objectType);
+	void addToObjectsToDisplay(Entity * const);
 	void respondToKeyDown(unsigned char, int, int);
 	void respondToKeyUp(unsigned char, int, int);
 	void animate();
@@ -25,13 +27,15 @@ public:
 	void recenterCamera();
 	double getProtagonistX();
 	double getProtagonistY();
-	int getProtagonistFacingDir();
+	direction getProtagonistFacingDir();
+	void displayProtagonist();
 
 private:
 	MansionGame();  // so that only one instance can be created, through getMansionGame()
 
 	Player protagonist;
 	Map map;
+	vector<Entity *> objectsToDisplay;
 };
 
 #endif /* MANSIONGAME_H_ */

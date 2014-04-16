@@ -7,11 +7,12 @@
 
 #include "Include.h"
 
-Entity::Entity(double xi, double yi, int width, int height, string file, int xframes, int yframes, bool trav){
+Entity::Entity(double xi, double yi, int width, int height, int thick, string file, int xframes, int yframes, bool trav){
 	x = xi;
 	y = yi;
 	w = width;
 	h = height;
+	thickness = thick;
 	numFramesX = xframes;
 	numFramesY = yframes;
 	texture = TextureSet::mainTextureSet().getTexture(file);
@@ -62,4 +63,21 @@ double Entity::getX() const{
 
 double Entity::getY() const{
 	return y;
+}
+
+double Entity::getW() const{
+	return w;
+}
+
+double Entity::getH() const{
+	return h;
+}
+
+double Entity::getThickness() const{
+	return thickness;
+}
+
+void Entity::interact(Entity & sender){
+	nextFrameY();
+	traversable = !traversable;
 }

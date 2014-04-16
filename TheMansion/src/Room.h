@@ -16,10 +16,19 @@ public:
 	virtual ~Room();
 	void display() const;
 	int isInRoom(double, double, double, double) const;
+	int mediumIsInRoom(double, double, double, double) const;
 	bool thoroughIsInRoom(double, double, double, double) const;
+	int getNumObjects();
+	void addObject(Entity &);
+	Entity & getObject(int);
+	void removeObject(int);
+//	void displayObjects(objectType) const;
+	void interact(Entity &, double, double, double, double);
+	void addObjectsToDisplay();
 
 private:
 	vector<vector<Entity> > tiles;
+	std::vector<Entity> objects;
 };
 
 #endif /* ROOM_H_ */

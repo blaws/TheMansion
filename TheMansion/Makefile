@@ -1,5 +1,5 @@
 CC = g++
-FLAGS = -g -Wall
+FLAGS = -g -Wall -Wno-deprecated
 OBJS = build/Entity.o build/Character.o build/Player.o build/Enemy.o build/Item.o build/Room.o build/Map.o build/TextureSet.o build/MansionGame.o build/main.o
 
 all: TheMansion

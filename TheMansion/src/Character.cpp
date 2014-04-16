@@ -7,8 +7,8 @@
 
 #include "Include.h"
 
-Character::Character(double x, double y, int w, int h, string texture, int xframes, int yframes, double s, int dir)
-	: Entity(x, y, w, h, texture, xframes, yframes) {
+Character::Character(double x, double y, int w, int h, int t, string texture, int xframes, int yframes, double s, direction dir)
+	: Entity(x, y, w, h, t, texture, xframes, yframes) {
 	speed = s;
 	movingRight = movingLeft = movingUp = movingDown = false;
 	facingDir = dir;
@@ -73,9 +73,11 @@ void Character::move(){
 	if(movingRight || movingLeft || movingUp || movingDown){
 		nextFrameY();
 		glutPostRedisplay();
+
+		//cout << "x = " << x << "; y = " << y << endl;
 	}
 }
 
-int Character::getFacingDir() const{
+direction Character::getFacingDir() const{
 	return facingDir;
 }

@@ -22,13 +22,14 @@ Map::~Map() {
 }
 
 // Sweeping Triangles - perspective display
-void Map::display() const{
+void Map::display(){
 	int drawcount = 0;
 	// set up
 	double formerPlane[4] = {0.0}, latterPlane[4] = {0.0}, capPlane[4] = {0.0};
 	int startX=mg.getProtagonistX()+PLAYER_WIDTH/2, startY=mg.getProtagonistY();
 	double endX[2], endY[2], capTheta, dYdX, interc, prevEndX, prevEndY;
 	double lower[2], upper[2];
+	bool streakVert=false, streakHor=false;
 
 	for(int i=0; i<3; ++i) glEnable(GL_CLIP_PLANE0+i);
 
@@ -37,13 +38,13 @@ void Map::display() const{
 	glTranslatef(startX, startY, 0.0);
 	mg.recenterCamera();
 
-	double boxLower[2], boxUpper[2];
+//	double boxLower[2], boxUpper[2];
 	queue<double> qX, qY;  // debug visualization
 
 	double startTheta = 0.0;//M_PI+DISPLAY_SWEEP_DELTA;
 	double endTheta = startTheta+2*M_PI;
 
-	for(double theta=startTheta; theta<=endTheta; theta+=DISPLAY_SWEEP_DELTA){
+	for(double theta=startTheta; theta<=endTheta+DISPLAY_SWEEP_DELTA/2; theta+=DISPLAY_SWEEP_DELTA){
 		// set latter arc plane
 		latterPlane[0] = sin(theta);
 		latterPlane[1] = -cos(theta);
@@ -56,12 +57,14 @@ void Map::display() const{
 		for(int i=0; i<2; ++i){
 			endX[i] = startX;
 			endY[i] = startY;
-			while(!mg.envCollision(endX[i], endY[i], 1, 1) && endX[i]<WINDOW_SIZE/2 && endY[i]<WINDOW_SIZE/2){
+			while(!mg.envCollision(endX[i], endY[i], 2, 2) && fabs(endX[i]-startX)<WINDOW_SIZE/2 && fabs(endY[i]-startY)<WINDOW_SIZE/2){
 				endX[i] += cos(theta+i*DISPLAY_SWEEP_DELTA);
 				endY[i] += sin(theta+i*DISPLAY_SWEEP_DELTA);
 			}
+/*			endX[i] -= cos(theta+i*DISPLAY_SWEEP_DELTA);
+			endY[i] -= sin(theta+i*DISPLAY_SWEEP_DELTA);*/
 		}
-		if((int)endX[0] != (int)endX[1]){
+		if(fabs(endX[0]-endX[1]) >= 1.0){
 			dYdX = (endY[1]-endY[0]) / (endX[1]-endX[0]);
 			capTheta = atan(dYdX);
 			interc = (endY[0]-startY) - (endX[0]-startX)*dYdX;
@@ -79,6 +82,8 @@ void Map::display() const{
 			capPlane[1] = 0.0;
 			capPlane[3] = (theta<M_PI/2 || theta>3*M_PI/2) ? endX[0]-startX : startX-endX[0];
 		}
+		if(fabs(endX[0]-prevEndX) <= 1.0) streakVert=true;
+		if(fabs(endY[0]-prevEndY) <= 1.0) streakHor=true;
 		if(theta==startTheta){
 			prevEndX = endX[0];
 			prevEndY = endY[0];
@@ -86,66 +91,79 @@ void Map::display() const{
 		}
 
 		// decide whether to draw yet
-		if(theta!=startTheta){
-			if((fabs(prevEndX-endX[1])>1.0 && fabs(prevEndY-endY[1])>1.0) || theta>=2*M_PI){
-				qX.push(prevEndX);
-				qY.push(prevEndY);
-				qX.push(endX[0]);
-				qY.push(endY[0]);
+		if(theta!=startTheta && ((streakVert && fabs(endX[1]-prevEndX)>1.0) || (streakHor && fabs(endY[1]-prevEndY)>1.0) || (!streakVert && !streakHor) || theta>=2*M_PI)){
+			// record corners for debug display
+			qX.push(prevEndX);
+			qY.push(prevEndY);
+			qX.push(endX[0]);
+			qY.push(endY[0]);
 
-				prevEndX = endX[0];
-				prevEndY = endY[0];
+			// set new starting point
+			prevEndX = endX[0];
+			prevEndY = endY[0];
+			streakHor = false;
+			streakVert = false;
 
-				// update room drawing box
-				if(startX < lower[0]) lower[0] = startX;
-				if(endX[0] < lower[0]) lower[0] = endX[0];
-				if(startX > upper[0]) upper[0] = startX;
-				if(endX[0] > upper[0]) upper[0] = endX[0];
-				if(startY < lower[1]) lower[1] = endY[1];
-				if(endY[0] < lower[1]) lower[1] = endY[1];
-				if(startY > upper[1]) upper[1] = startY;
-				if(endY[0] > upper[1]) upper[1] = endY[0];
+			// update room drawing box
+			if(startX < lower[0]) lower[0] = startX;
+			if(endX[0] < lower[0]) lower[0] = endX[0];
+			if(startX > upper[0]) upper[0] = startX;
+			if(endX[0] > upper[0]) upper[0] = endX[0];
+			if(startY < lower[1]) lower[1] = endY[1];
+			if(endY[0] < lower[1]) lower[1] = endY[1];
+			if(startY > upper[1]) upper[1] = startY;
+			if(endY[0] > upper[1]) upper[1] = endY[0];
 
-				// draw
-				glClipPlane(GL_CLIP_PLANE0, formerPlane);
-				glClipPlane(GL_CLIP_PLANE1, latterPlane);
-				glPushMatrix();
-				glLoadIdentity();
-				cout << "draw #" << ++drawcount << endl;
-				int numroomsdrawn = 0;
+/*			for(int i=0; i<2; ++i){
+				boxLower[i] = lower[i];
+				boxUpper[i] = upper[i];
+			}*/
 
-				for(int i=0,n=rooms.size(); i<n; ++i){
-					if(rooms[i].isInRoom(lower[0], lower[1], upper[0]-lower[0], upper[1]-lower[1])){
-						rooms[i].display();
-						++numroomsdrawn;
-					}
+			// draw
+			//cout << "draw #" << ++drawcount << endl;
+			int numroomsdrawn = 0;
+			glClipPlane(GL_CLIP_PLANE0, formerPlane);
+			glClipPlane(GL_CLIP_PLANE1, latterPlane);
+			glPushMatrix();
+			glLoadIdentity();
+
+			// only draw visible rooms
+			int total=0, current;
+			for(int i=0,n=rooms.size(); i<n /*&& total<9*/; ++i){
+				current = rooms[i].mediumIsInRoom(lower[0], lower[1], fabs(upper[0]-lower[0]), fabs(upper[1]-lower[1]));
+				if(current > 0){
+					rooms[i].display();
+					rooms[i].addObjectsToDisplay();
+					++numroomsdrawn;
+					total += current;
 				}
-				cout << numroomsdrawn << endl;
-				glPopMatrix();
-
-				// reset room drawing box
-				lower[0] = upper[0] = startX;
-				lower[1] = upper[1] = startY;
-				if(startX < lower[0]) lower[0] = startX;
-				if(endX[0] < lower[0]) lower[0] = endX[0];
-				if(startX > upper[0]) upper[0] = startX;
-				if(endX[0] > upper[0]) upper[0] = endX[0];
-				if(startY < lower[1]) lower[1] = endY[1];
-				if(endY[0] < lower[1]) lower[1] = endY[1];
-				if(startY > upper[1]) upper[1] = startY;
-				if(endY[0] > upper[1]) upper[1] = endY[0];
-
-				// change former arc plane
-				for(int i=0; i<4; ++i) formerPlane[i] = i<2 ? -latterPlane[i] : latterPlane[i];
 			}
-		}
+			//cout << "  " << numroomsdrawn << " rooms drawn" << endl;
+			glPopMatrix();
 
+			// reset room drawing box
+			lower[0] = upper[0] = startX;
+			lower[1] = upper[1] = startY;
+			if(prevEndX < lower[0]) lower[0] = prevEndX;
+			if(endX[0] < lower[0]) lower[0] = endX[0];
+			if(prevEndX > upper[0]) upper[0] = prevEndX;
+			if(endX[0] > upper[0]) upper[0] = endX[0];
+			if(prevEndY < lower[1]) lower[1] = prevEndY;
+			if(endY[0] < lower[1]) lower[1] = endY[0];
+			if(prevEndY > upper[1]) upper[1] = prevEndY;
+			if(endY[0] > upper[1]) upper[1] = endY[0];
+
+			// change former arc plane
+			for(int i=0; i<4; ++i) formerPlane[i] = i<2 ? -latterPlane[i] : latterPlane[i];
+		}
 	}
 
 	for(int i=0; i<3; ++i) glDisable(GL_CLIP_PLANE0+i);
 
 	glLoadIdentity();
-	glDisable(GL_TEXTURE_2D);
+
+	// debug: draw display triangles
+/*	glDisable(GL_TEXTURE_2D);
 	glColor3f(R_TRANSPARENT/255.0, G_TRANSPARENT/255.0, B_TRANSPARENT/255.0);
 	while(!qX.empty()){
 		glBegin(GL_LINE_STRIP);
@@ -156,25 +174,17 @@ void Map::display() const{
 		glVertex2i(startX, startY);
 		qX.pop(); qY.pop();
 		glEnd();
-	}
-	glColor3f(1.0,0.0,0.0);
+	}*/
+/*	glColor3f(1.0,0.0,0.0);
 	glBegin(GL_LINE_STRIP); glVertex2f(boxLower[0], boxLower[1]); glVertex2f(boxLower[0], boxUpper[1]); glVertex2f(boxUpper[0], boxUpper[1]); glVertex2f(boxUpper[0], boxLower[1]); glVertex2f(boxLower[0], boxLower[1]); glEnd();
-	glEnable(GL_TEXTURE_2D);
-}
-
-void Map::displayObjects(int type) const{  // type = OBJ_BACKGROUND or OBJ_FOREGROUND
-	for(vector<Entity>::const_iterator i=objects.begin(); i!=objects.end(); ++i){
-		if(type==OBJ_BACKGROUND && (i->getY() >= mg.getProtagonistY()))
-			i->display();
-		else if(type==OBJ_FOREGROUND && (i->getY() < mg.getProtagonistY()))
-			i->display();
-	}
+	glEnable(GL_TEXTURE_2D);*/
 }
 
 int Map::isInMap(double xi, double yi, int wi, int hi){
 	int val=0;  // once val reaches 4, the box is fully in one or more rooms
 	for(int i=0,n=rooms.size(); i<n; ++i){
 		val += rooms[i].isInRoom(xi, yi, wi, hi);
+		if(val >= 4) return 4;
 	}
 	return val;
 }
@@ -243,12 +253,12 @@ bool Map::addNextConnectingRoom(bool first, queue<int> & connectionsX, queue<int
 
 		// add some actual doorways
 		if(doorways[DIRECTION_UP]>0 && rand()%2==0){
-			Entity tmp(roomX+doorways[DIRECTION_UP]*FLOOR_TILE_SIZE, roomY+roomH-FLOOR_TILE_SIZE, DOORWAY_WIDTH, DOORWAY_HEIGHT, string("door.bmp"), 1, 2, false);
-			objects.push_back(tmp);
+			Entity tmp(roomX+doorways[DIRECTION_UP]*FLOOR_TILE_SIZE, roomY+roomH-FLOOR_TILE_SIZE, DOORWAY_WIDTH, DOORWAY_HEIGHT, 5, string("door.bmp"), 1, 2, false);
+			rooms.back().addObject(tmp);
 		}
 		if(doorways[DIRECTION_DOWN]>0 && rand()%2==0){
-			Entity tmp(roomX+doorways[DIRECTION_DOWN]*FLOOR_TILE_SIZE, roomY, DOORWAY_WIDTH, DOORWAY_HEIGHT, string("door.bmp"), 1, 2, false);
-			objects.push_back(tmp);
+			Entity tmp(roomX+doorways[DIRECTION_DOWN]*FLOOR_TILE_SIZE, roomY, DOORWAY_WIDTH, DOORWAY_HEIGHT, 5, string("door.bmp"), 1, 2, false);
+			rooms.back().addObject(tmp);
 		}
 
 		// prepare for next rooms (save location of doorways)
@@ -266,4 +276,24 @@ bool Map::addNextConnectingRoom(bool first, queue<int> & connectionsX, queue<int
 		return false;
 	}
 	else return true;
+}
+
+bool Map::objectCollision(double x, double y, double w, double h){
+	for(int i=0,n=rooms.size(); i<n; ++i){
+		if(rooms[i].isInRoom(x, y, w, h)){
+			for(int j=0,m=rooms[i].getNumObjects(); j<m; ++j){
+				Entity obj = rooms[i].getObject(j);
+				if(overlap(x, y, w, h, obj.getX(), obj.getY(), obj.getW(), obj.getThickness()) && !obj.isTraversable()){
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+void Map::interact(Entity & sender, double x, double y, double w, double t){
+	for(int i=0,n=rooms.size(); i<n; ++i){
+		if(rooms[i].isInRoom(x, y, w, t)) rooms[i].interact(sender, x, y, w, t);
+	}
 }

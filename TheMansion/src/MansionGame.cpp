@@ -60,12 +60,30 @@ void MansionGame::initAndOpenWindow(int* argc, char* argv[]){
 void MansionGame::display(){
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	objectsToDisplay.clear();
 	map.display();
-	//map.displayObjects(OBJ_BACKGROUND);
+	displayObjects(OBJ_BACKGROUND);
 	protagonist.display();
-	//map.displayObjects(OBJ_FOREGROUND);
+	displayObjects(OBJ_FOREGROUND);
 
 	glutSwapBuffers();
+}
+
+void MansionGame::displayObjects(objectType type){
+	for(vector<Entity *>::iterator i=objectsToDisplay.begin(); i!=objectsToDisplay.end(); ++i){
+		if(type==OBJ_BACKGROUND && ((*i)->getY() >= mg.getProtagonistY()))
+			(*i)->display();
+		else if(type==OBJ_FOREGROUND && ((*i)->getY() < mg.getProtagonistY()))
+			(*i)->display();
+	}
+}
+
+void MansionGame::addToObjectsToDisplay(Entity * const obj){
+	objectsToDisplay.push_back(obj);
+}
+
+void MansionGame::displayProtagonist(){
+	protagonist.display();
 }
 
 void MansionGame::respondToKeyDown(unsigned char key, int x, int y){
@@ -86,6 +104,8 @@ void MansionGame::respondToKeyDown(unsigned char key, int x, int y){
 	case 'Q':
 	case 27:  // ESC key
 		exit(0);
+	case ' ':
+		map.interact(protagonist, protagonist.getX(), protagonist.getY(), protagonist.getW(), protagonist.getThickness());
 	}
 }
 
@@ -113,8 +133,8 @@ void MansionGame::animate(){
 	glutTimerFunc(ANIMATION_PERIOD, animate_TRAMP, 0);
 }
 
-bool MansionGame::envCollision(double xi, double yi, int wi, int hi){
-	return (map.isInMap(xi, yi, wi, hi) < 4);
+bool MansionGame::envCollision(double xi, double yi, int wi, int ti){
+	return map.isInMap(xi, yi, wi, ti)<4 || map.objectCollision(xi, yi, wi, ti);
 }
 
 void MansionGame::recenterCamera(){
@@ -132,6 +152,6 @@ double MansionGame::getProtagonistY(){
 	return protagonist.getY();
 }
 
-int MansionGame::getProtagonistFacingDir(){
+direction MansionGame::getProtagonistFacingDir(){
 	return protagonist.getFacingDir();
 }

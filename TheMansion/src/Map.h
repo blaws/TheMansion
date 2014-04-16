@@ -14,14 +14,14 @@ class Map {
 public:
 	Map();
 	virtual ~Map();
-	void display() const;
-	void displayObjects(int) const;
+	void display();
 	int isInMap(double, double, int, int);
 	bool thoroughIsInMap(double, double, int, int);
+	bool objectCollision(double, double, double, double);
+	void interact(Entity &, double, double, double, double);
 
 private:
 	std::vector<Room> rooms;
-	std::vector<Entity> objects;
 
 	bool addNextConnectingRoom(bool, queue<int> &, queue<int> &, queue<int> &);
 };
