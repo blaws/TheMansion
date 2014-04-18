@@ -1,0 +1,10 @@
+TheMansion
+blaws
+
+Simple 2D top-down game in development, emphasizing perspective and random generation.
+
+Controls:
+WASD - move.
+q / ESC - quit.
+
+Developed on Mac OSX 10.9 with Eclipse CDT. Uses GLUT/OpenGL.
